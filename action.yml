@@ -1,0 +1,86 @@
+name: "TI CCStudio Dockerized Build"
+description: "Build (or pull) the CCStudio Docker image, then run the build"
+author: "zfb132"
+branding:
+  icon: 'anchor'
+  color: 'blue'
+
+outputs:
+  results_dir:
+    description: "The absolute path to the directory where build results are copied"
+    value: ${{ steps.run_build.outputs.results_dir }}
+inputs:
+  project_location:
+    description: "Path(s) to CCS project file(s) or directories (comma-separated)"
+    required: true
+  build_type:
+    description: "Build type: Release or Debug"
+    required: false
+    default: "Release"
+  results_dir:
+    description: "Path to the directory where build results will be copied"
+    required: false
+    default: "results_${{ github.run_id }}_${{ github.run_attempt }}"
+  entrypoint:
+    description: "Script Path to override the default entry point file (e.g., ./entrypoint.sh); empty = default"
+    required: false
+    default: ""
+  time_zone:
+    description: "Time zone (e.g., America/New_York); empty = UTC"
+    required: false
+    default: "UTC"
+  ubuntu_version:
+    description: "Ubuntu version: 20.04, 22.04, or 24.04"
+    required: false
+    default: "24.04"
+  ccs_version:
+    description: "CCS version: e.g., 10.4.0.00006, 11.2.0.00007, 12.8.1.00005, or 20.2.0.00012"
+    required: false
+    default: "20.2.0.00012"
+  ccs_components:
+    description: "CCS components (e.g., PF_ALL)"
+    required: false
+    default: "PF_ALL"
+  mmwsdk_version:
+    description: "mmWave SDK version (empty = skip)"
+    required: false
+    default: "03.06.02.00-LTS"
+  mmwsdk_components:
+    description: "mmWave SDK components (e.g., ALL; empty = skip)"
+    required: false
+    default: "ALL"
+  bios_version:
+    description: "SYS/BIOS version (empty = skip)"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Build or pull CCS image
+      id: build_img
+      shell: bash
+      run: |
+        chmod +x ${GITHUB_ACTION_PATH}/build-ccs-image.sh
+        ${GITHUB_ACTION_PATH}/build-ccs-image.sh \
+          "${{ inputs.ubuntu_version }}" \
+          "${{ inputs.ccs_version }}" \
+          "${{ inputs.ccs_components }}" \
+          "${{ inputs.mmwsdk_version }}" \
+          "${{ inputs.mmwsdk_components }}" \
+          "${{ inputs.bios_version }}"
+
+    - name: Run CCS build in container
+      shell: bash
+      id: run_build
+      run: |
+        results_dir=$(realpath "${{ github.workspace }}/${{ inputs.results_dir }}")
+        mkdir -p "${results_dir}"
+        echo "Results directory: ${results_dir}"
+        echo "results_dir=$(realpath "${{ inputs.results_dir }}")" >> $GITHUB_OUTPUT
+        docker run --rm \
+          -e "TZ=${{ inputs.time_zone }}" \
+          $( [ -e ${{ github.workspace }}/entrypoint.sh ] && chmod +x ${{ github.workspace }}/entrypoint.sh && echo "-v ${{ github.workspace }}/entrypoint.sh:/entrypoint.sh" ) \
+          -v "${{ github.workspace }}:/ccs_projects" \
+          -v "${results_dir}:/workspaces" \
+          "${{ steps.build_img.outputs.IMAGE }}" \
+          "${{ inputs.project_location }}" "${{ inputs.build_type }}"
