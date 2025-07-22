@@ -1,10 +1,10 @@
 [![GitHub release](https://img.shields.io/github/release/zfb132/build-ccstudio-project.svg?style=flat-square)](https://github.com/zfb132/build-ccstudio-project/releases/latest)
-[![GitHub marketplace](https://img.shields.io/badge/marketplace-ccstudio--docker--build-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/ti-ccstudio-docker-build-projects)
+[![GitHub marketplace](https://img.shields.io/badge/marketplace-build--ccstudio--project-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/build-ccstudio-project)
 
 # TI CCStudio Docker Build Projects
 
 GitHub Action to build TI Code Composer Studio (CCStudio) projects inside a Docker container, with automatic image build or pull support. This helps you build embedded projects reproducibly in CI environments without installing CCS manually.  
-The prebuilt Docker image is available on [GitHub Container Registry](https://github.com/zfb132/build-ccstudio-project/pkgs/container/ccstudio) and [Docker Hub](https://hub.docker.com/r/whuzfb/ccstudio).  
+The prebuilt Docker image is available on [GitHub Container Registry](https://github.com/zfb132/build-ccstudio-project/pkgs/container/ccstudio) and [Docker Hub](https://hub.docker.com/r/whuzfb/ccstudio), built with [zfb132/ccstudio](https://github.com/zfb132/ccstudio).
 
 ## Docker Image Resolution Order
 When running this GitHub Action, Docker images are resolved in the following priority order:
