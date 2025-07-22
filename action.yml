@@ -1,4 +1,4 @@
-name: "TI CCStudio Dockerized Build"
+name: "Build CCStudio Project"
 description: "Build (or pull) the CCStudio Docker image, then run the build"
 author: "zfb132"
 branding:
